@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-tngq(0c0%&hry&okpk@fb73liy&p=ogmxffy%x^!c@if3hfn)i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+#api base url 추가해야 함.
+ALLOWED_HOSTS = ['127.0.0.1','localhost' ]
 
 
 # Application definition
