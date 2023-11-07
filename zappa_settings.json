@@ -1,0 +1,10 @@
+{
+    "dev": {
+        "aws_region": "ap-northeast-2",
+        "django_settings": "seoulbike_dashboard.settings",
+        "profile_name": "default",
+        "project_name": "seoulbike-dashb",
+        "runtime": "python3.10",
+        "s3_bucket": "zappa-vtogpgs2j"
+    }
+}
