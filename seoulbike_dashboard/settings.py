@@ -22,16 +22,22 @@ env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, '.env')
 )
+API_KEY = env('API_KEY')
 
 
 pymysql.install_as_MySQLdb()
+
+# Pagination Setting
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10, 
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
-print(env('DATABASE_NAME'))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -42,6 +48,8 @@ ALLOWED_HOSTS = ['127.0.0.1','localhost' ,env('STATIC_URL')]
 # Application definition
 
 INSTALLED_APPS = [
+    'bike_data.apps.BikeDataConfig',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
