@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import *
 
-class StationSerializer(serializers.ModelSerializer):
+class StationAPISerializer(serializers.ModelSerializer):
     RENT_NO = serializers.IntegerField(source='station_id')
     STA_LOC = serializers.CharField(source='location')
     RENT_NM = serializers.CharField(source='station_name')
@@ -13,4 +13,10 @@ class StationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Station
         fields = ['RENT_NO', 'STA_LOC', 'RENT_NM', 'STA_LAT', 'STA_LONG', 'STA_ADD1', 'STA_ADD2']
+
+class StationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Station
+        fields = '__all__'
     
