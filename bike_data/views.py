@@ -38,3 +38,22 @@ def setup(request):
 
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
 
+class UsageList(generics.ListAPIView):
+    serializer_class = UsageSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        return Usage.objects.all()
+        
+
+@api_view(['GET'])
+def setup_usage(request):
+    url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/1/5/202208"
+    response = requests.get(url)
+    data = response.json()['cycleRentUseMonthInfo']['row']
+    serializer = UsageSerializer(data=data, many=True)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return Response(serializer.errors)
+
+    return Response(len(serializer.validated_data), status=status.HTTP_200_OK)

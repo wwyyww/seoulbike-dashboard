@@ -10,6 +10,8 @@ class Station(models.Model):
     longitude = models.DecimalField(max_digits=11, decimal_places=8, verbose_name='경도')
 
 class Usage(models.Model):
-    station = models.ForeignKey(Station, related_name='usages', on_delete=models.CASCADE)
     use_count = models.IntegerField(verbose_name='이용량')
-    use_date = models.DateField(verbose_name='대여날짜')
+    use_date = models.CharField(max_length=8,verbose_name='대여날짜')
+    station_id = models.IntegerField(verbose_name='대여소 번호')
+    gender = models.CharField(max_length=10, verbose_name='성별',null=True)
+    age_range = models.CharField(max_length=10, verbose_name='연령대', null=True) 

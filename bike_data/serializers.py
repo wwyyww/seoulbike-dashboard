@@ -20,3 +20,14 @@ class StationSerializer(serializers.ModelSerializer):
         model = Station
         fields = '__all__'
     
+class UsageSerializer(serializers.ModelSerializer):
+    RENT_NM = serializers.CharField(source='use_date')
+    STATION_NO = serializers.CharField(source='station_id')
+    GENDER_CD = serializers.CharField(source='gender', allow_blank=True)
+    AGE_TYPE = serializers.CharField(source='age_range')
+    USE_CNT = serializers.IntegerField(source='use_count')
+
+    class Meta:
+        model = Usage
+        fields = ['RENT_NM', 'STATION_NO', 'GENDER_CD', 'AGE_TYPE', 'USE_CNT']
+
