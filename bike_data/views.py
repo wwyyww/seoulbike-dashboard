@@ -9,11 +9,11 @@ from bike_data.serializers import *
 
 API_KEY = settings.API_KEY
 
+
 class StationList(generics.ListAPIView):
     serializer_class = StationSerializer
 
     def get_queryset(self, *args, **kwargs):
-        # param = self.request.GET['location']
         param = self.kwargs.get('location')
         return Station.objects.filter(location=param)
         
@@ -50,7 +50,7 @@ def setup_usage(request):
     url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/1/5/202208"
     response = requests.get(url)
     data = response.json()['cycleRentUseMonthInfo']['row']
-    serializer = UsageSerializer(data=data, many=True)
+    serializer = UsageAPISerializer(data=data, many=True)
     if serializer.is_valid():
         serializer.save()
     else:
