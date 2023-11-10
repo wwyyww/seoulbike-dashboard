@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('map/', include('map_visualize.urls')),
     path('api/', include('bike_data.urls')),
     path('admin/', admin.site.urls),
+    
 ]
