@@ -47,13 +47,26 @@ class UsageList(generics.ListAPIView):
 
 @api_view(['GET'])
 def setup_usage(request):
-    url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/1/5/202208"
-    response = requests.get(url)
-    data = response.json()['cycleRentUseMonthInfo']['row']
-    serializer = UsageAPISerializer(data=data, many=True)
-    if serializer.is_valid():
-        serializer.save()
-    else:
-        return Response(serializer.errors)
+    # 기간 조정 필요
+    start_year, end_year=2018,2023
+    start_month,end_month=1,12
+    for year in range(start_year, end_year+1):
+        for month in range(start_month, end_month+1):
+            ym = f"{year}{month:02d}"
+            start = 1
+            end = 1000
+            while True:
+                url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/{start}/{end}/{ym}"
+                response = requests.get(url)
+                data = response.json()['cycleRentUseMonthInfo']['row']
+                serializer = UsageSerializer(data=data, many=True)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_REQUEST)
+                if len(data)<1000:
+                    break
+                start+=1000
+                end+=1000
 
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
