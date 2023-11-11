@@ -5,7 +5,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
 from bike_data.serializers import *
-
+from io import StringIO
+import chardet
+import csv
 
 API_KEY = settings.API_KEY
 
@@ -16,7 +18,7 @@ class StationList(generics.ListAPIView):
     def get_queryset(self, *args, **kwargs):
         param = self.kwargs.get('location')
         return Station.objects.filter(location=param)
-        
+
 
 @api_view(['GET'])
 def setup(request):
@@ -38,35 +40,58 @@ def setup(request):
 
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
 
+
 class UsageList(generics.ListAPIView):
     serializer_class = UsageSerializer
 
     def get_queryset(self, *args, **kwargs):
         return Usage.objects.all()
-        
+
 
 @api_view(['GET'])
 def setup_usage(request):
-    # 기간 조정 필요
-    start_year, end_year=2018,2023
-    start_month,end_month=1,12
-    for year in range(start_year, end_year+1):
-        for month in range(start_month, end_month+1):
-            ym = f"{year}{month:02d}"
-            start = 1
-            end = 1000
-            while True:
-                url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/{start}/{end}/{ym}"
-                response = requests.get(url)
-                data = response.json()['cycleRentUseMonthInfo']['row']
-                serializer = UsageSerializer(data=data, many=True)
-                if serializer.is_valid():
-                    serializer.save()
-                else:
-                    return Response(serializer.errors, status=status.HTTP_400_REQUEST)
-                if len(data)<1000:
-                    break
-                start+=1000
-                end+=1000
+    url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleRentUseMonthInfo/1/5/202208"
+    response = requests.get(url)
+    data = response.json()['cycleRentUseMonthInfo']['row']
+    serializer = UsageAPISerializer(data=data, many=True)
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        return Response(serializer.errors)
 
-    return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def setup_stationusage(request, seq_no):
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'ALL:@SECLEVEL=1'
+    file_url = "https://datafile.seoul.go.kr/bigfile/iot/inf/nio_download.do?&useCache=false"
+
+    params = {
+        'infId': 'OA-15249',
+        'seqNo': seq_no,
+        'seq': seq_no,
+        'infSeq': '1',
+    }
+
+    response = requests.get(file_url, params=params, verify=False)
+
+    if response.status_code == 200:
+        content = response.content.decode('cp949')
+
+        encoding_info = chardet.detect(response.content)
+        encoding = encoding_info['encoding']
+        content = response.content.decode(encoding)
+
+        csv_file = StringIO(content)
+        csv_reader = csv.reader(csv_file, delimiter=',')
+
+        header = next(csv_reader)
+        data = [dict(zip(header, row)) for row in csv_reader]
+
+        for row_data in data:
+            serializer = StationUsageSerializer(data=row_data)
+            if serializer.is_valid():
+                serializer.save()
+
+        return Response(len(data), status=status.HTTP_200_OK)
+    else:
+        return render(request, 'error.html', {'error_message': 'Failed'})
