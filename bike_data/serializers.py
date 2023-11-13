@@ -44,8 +44,12 @@ class UsageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class StationSerializer(serializers.ModelSerializer):
-    usages = UsageSerializer(many=True)
+    # usages = UsageSerializer(many=True)
+    usages_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Station
         fields = '__all__'
+
+    def get_usages_count(self, obj):
+        return obj.usages.count()

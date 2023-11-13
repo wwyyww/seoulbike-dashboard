@@ -6,8 +6,8 @@ class Station(models.Model):
     location = models.CharField(max_length=200, verbose_name='자치구') 
     addr1 = models.CharField(max_length=200, verbose_name='주소1')
     addr2 = models.CharField(max_length=200, verbose_name='주소2', null=True)
-    latitude = models.DecimalField(max_digits=11, decimal_places=8, verbose_name='위도')
-    longitude = models.DecimalField(max_digits=11, decimal_places=8, verbose_name='경도')
+    latitude = models.DecimalField(max_digits=11, decimal_places=6, verbose_name='위도')
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, verbose_name='경도')
 
 class Usage(models.Model):
     station = models.ForeignKey(Station, related_name='usages', on_delete=models.CASCADE, db_column="station_id")

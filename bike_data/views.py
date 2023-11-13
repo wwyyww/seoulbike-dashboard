@@ -15,7 +15,10 @@ class StationList(generics.ListAPIView):
 
     def get_queryset(self, *args, **kwargs):
         param = self.kwargs.get('location')
-        return Station.objects.filter(location=param)
+        if param:
+            return Station.objects.filter(location=param)
+        else:
+            return Station.objects.all()
         
 
 @api_view(['GET'])
