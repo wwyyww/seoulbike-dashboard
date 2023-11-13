@@ -1,11 +1,10 @@
 var mapcontainer = document.getElementById('map');
 var mapoptions = {
 	center: new kakao.maps.LatLng(37.508319, 127.034405),
-	level: 6
+	level: 4
 };
+map = new kakao.maps.Map(mapcontainer, mapoptions);
 
-var map = new kakao.maps.Map(mapcontainer, mapoptions);
-        
 function setMapType(maptype) { 
     var roadmapControl = document.getElementById('btnRoadmap');
     var skyviewControl = document.getElementById('btnSkyview'); 
@@ -29,3 +28,4 @@ function zoomIn() {
 function zoomOut() {
     map.setLevel(map.getLevel() + 1);
 }
+

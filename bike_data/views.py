@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
 from bike_data.serializers import *
+import json
 
 
 API_KEY = settings.API_KEY
@@ -57,3 +58,33 @@ def setup_usage(request):
         return Response(serializer.errors)
 
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
+
+def mapping(request):
+    #stationlist = Station.objects.all()
+    #station_content = json.dumps(stationlist)
+    #usagelist = Usage.objects.all()
+    #usage_content = json.dumps(usagelist)
+    station_content = Station.objects.all()
+    usage_content = Usage.objects.all()
+    content = {'station_content' : station_content, 'usage_content' : usage_content}
+    return render(request, 'bike_data/index.html', content)
+
+def text(request):
+    #stationlist = Station.objects.all()
+    #station_content = json.dumps(stationlist)
+    #usagelist = Usage.objects.all()
+    #usage_content = json.dumps(usagelist)
+    station_content = Station.objects.all()
+    usage_content = Usage.objects.all()
+    content = {'station_content' : station_content, 'usage_content' : usage_content}
+    return render(request, 'bike_data/text.html', content)
+
+def seoulbike(request):
+    #stationlist = Station.objects.all()
+    #station_content = json.dumps(stationlist)
+    #usagelist = Usage.objects.all()
+    #usage_content = json.dumps(usagelist)
+    station_content = Station.objects.all()
+    usage_content = Usage.objects.all()
+    content = {'station_content' : station_content, 'usage_content' : usage_content}
+    return render(request, 'bike_data/seoulbike.html', content)

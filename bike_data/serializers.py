@@ -14,20 +14,38 @@ class StationAPISerializer(serializers.ModelSerializer):
         model = Station
         fields = ['RENT_NO', 'STA_LOC', 'RENT_NM', 'STA_LAT', 'STA_LONG', 'STA_ADD1', 'STA_ADD2']
 
-class StationSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Station
-        fields = '__all__'
-    
-class UsageSerializer(serializers.ModelSerializer):
+class UsageAPISerializer(serializers.Serializer):
     RENT_NM = serializers.CharField(source='use_date')
-    STATION_NO = serializers.CharField(source='station_id')
+    STATION_NO = serializers.IntegerField()
     GENDER_CD = serializers.CharField(source='gender', allow_blank=True)
     AGE_TYPE = serializers.CharField(source='age_range')
     USE_CNT = serializers.IntegerField(source='use_count')
 
+    def create(self, validated_data):
+        station = Station.objects.get(station_id=validated_data['STATION_NO'])
+        usage = Usage.objects.create(
+            station_id = station.id,
+            use_count = validated_data['use_count'],
+            use_date = validated_data['use_date'],
+            gender = validated_data['gender'],
+            age_range = validated_data['age_range'],
+        )
+        usage.save()
+        return usage
+    
     class Meta:
         model = Usage
         fields = ['RENT_NM', 'STATION_NO', 'GENDER_CD', 'AGE_TYPE', 'USE_CNT']
 
+class UsageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Usage
+        fields = '__all__'
+
+class StationSerializer(serializers.ModelSerializer):
+    usages = UsageSerializer(many=True)
+
+    class Meta:
+        model = Station
+        fields = '__all__'

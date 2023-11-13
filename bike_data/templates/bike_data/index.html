@@ -23,12 +23,7 @@
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=cd3190ada0d066115f2a46edfec271ab&libraries=services,clusterer,drawing" type="text/javascript" ></script>
     <script src="/static/js/map.js" type="text/javascript"></script>
     <script src="/static/js/marker.js" type="text/javascript"></script>
-
-    {% for usage in usage_content %}
-        {{usage.station_id}}<br/>
-        {{usage.use_count}}<br/>
-        {{usage.gender}}<br/>
-    {% endfor %}
+    <p id="result"></p>
 
 </body>
 </html>
