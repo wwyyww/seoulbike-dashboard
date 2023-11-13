@@ -5,7 +5,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
 from bike_data.serializers import *
-
+from io import StringIO
+import chardet
+import csv
 
 API_KEY = settings.API_KEY
 
@@ -20,6 +22,8 @@ class StationList(generics.ListAPIView):
         else:
             return Station.objects.all()
         
+        return Station.objects.filter(location=param)
+
 
 @api_view(['GET'])
 def setup(request):
@@ -41,12 +45,13 @@ def setup(request):
 
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
 
+
 class UsageList(generics.ListAPIView):
     serializer_class = UsageSerializer
 
     def get_queryset(self, *args, **kwargs):
         return Usage.objects.all()
-        
+
 
 @api_view(['GET'])
 def setup_usage(request):
@@ -59,4 +64,39 @@ def setup_usage(request):
     else:
         return Response(serializer.errors)
 
-    return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def setup_stationusage(request, seq_no):
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'ALL:@SECLEVEL=1'
+    file_url = "https://datafile.seoul.go.kr/bigfile/iot/inf/nio_download.do?&useCache=false"
+
+    params = {
+        'infId': 'OA-15249',
+        'seqNo': seq_no,
+        'seq': seq_no,
+        'infSeq': '1',
+    }
+
+    response = requests.get(file_url, params=params, verify=False)
+
+    if response.status_code == 200:
+        content = response.content.decode('cp949')
+
+        encoding_info = chardet.detect(response.content)
+        encoding = encoding_info['encoding']
+        content = response.content.decode(encoding)
+
+        csv_file = StringIO(content)
+        csv_reader = csv.reader(csv_file, delimiter=',')
+
+        header = next(csv_reader)
+        data = [dict(zip(header, row)) for row in csv_reader]
+
+        for row_data in data:
+            serializer = StationUsageSerializer(data=row_data)
+            if serializer.is_valid():
+                serializer.save()
+
+        return Response(len(data), status=status.HTTP_200_OK)
+    else:
+        return render(request, 'error.html', {'error_message': 'Failed'})

@@ -15,3 +15,10 @@ class Usage(models.Model):
     use_date = models.CharField(max_length=8,verbose_name='대여날짜')
     gender = models.CharField(max_length=10, verbose_name='성별',null=True)
     age_range = models.CharField(max_length=10, verbose_name='연령대', null=True) 
+
+class StationUsage(models.Model):
+    district = models.CharField(max_length=255)
+    station_name = models.CharField(max_length=255)
+    use_ym = models.CharField(max_length=6)
+    rental_count = models.IntegerField()
+    return_count = models.IntegerField()
