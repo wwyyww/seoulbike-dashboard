@@ -59,6 +59,24 @@ def setup_usage(request):
     else:
         return Response(serializer.errors)
 
+class StationUsageList(generics.ListAPIView):
+    serializer_class = StationUsageSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        district_param = self.request.query_params.get('district', None)
+        use_ym_param = self.request.query_params.get('use_ym', None)
+
+        filters = {}
+
+        if district_param:
+            filters['district'] = district_param
+
+        if use_ym_param:
+            filters['use_ym'] = use_ym_param
+
+        return StationUsage.objects.filter(**filters)
+
+
 
 @api_view(['GET'])
 def setup_stationusage(request, seq_no):
