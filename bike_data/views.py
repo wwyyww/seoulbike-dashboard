@@ -9,12 +9,16 @@ from bike_data.serializers import *
 from io import StringIO
 import chardet
 import csv
-from .charts import plot_to_base64
+from .show_chart import *
 
 API_KEY = settings.API_KEY
 
-def show_image(request):
-    image_base64 = plot_to_base64()
+def station_by_district(request):
+    image_base64 = barplot_station_per_district()
+    return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
+
+def usage_by_district(request):
+    image_base64 = graphplot_usage_per_district()
     return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
 
 

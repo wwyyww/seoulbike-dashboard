@@ -90,7 +90,13 @@ def graphplot_usage_per_district(df, standard, title):
     plt.ylabel(standard)
     plt.grid(True)
 
-    plt.show()
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+
+    image_png = buffer.getvalue()
+    buffer.close()
+    return base64.b64encode(image_png).decode()
 
 def applyAnalysis(district_param, use_ym_param):
     api_url = "http://127.0.0.1:8000/api/stationusage/"
@@ -122,29 +128,23 @@ def barplot_station_per_district():
 
     data4 = pd.DataFrame(list(Station.objects.all().values()))
 
-    # 자치구별 대여소 수 계산
     count_by_district = data4['location'].value_counts()
 
-    # 막대 그래프 그리기
     plt.figure(figsize=(10, 6))
     bars = count_by_district.plot(kind='bar')
 
-    # 각 막대에 값을 텍스트로 표시
     for bar in bars.patches:
         plt.text(bar.get_x() + bar.get_width() / 2 - 0.001, bar.get_height() + 0.05, f'{bar.get_height()}', ha='center', va='bottom', color='black')
 
-    # 그래프에 라벨, 제목 추가
     df11 = plt.xlabel('자치구')
     df11 = plt.ylabel('대여소 수')
     df11 = plt.title('자치구별 공공자전거 대여소 수')
     df11 = plt.xticks(rotation=45)
 
-    # 이미지를 BytesIO에 저장
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
 
-    # 이미지를 base64로 변환하여 전달
     image_png = buffer.getvalue()
     buffer.close()
     return base64.b64encode(image_png).decode()
