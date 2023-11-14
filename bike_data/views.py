@@ -4,6 +4,7 @@ from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status, generics
+from rest_framework.pagination import PageNumberPagination
 from bike_data.serializers import *
 from io import StringIO
 import chardet
@@ -64,6 +65,28 @@ def setup_usage(request):
     else:
         return Response(serializer.errors)
 
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 1000
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
+
+class StationUsageList(generics.ListAPIView):
+    serializer_class = StationUsageSerializer
+    pagination_class = LargeResultsSetPagination
+
+    def get_queryset(self, *args, **kwargs):
+        district_param = self.request.query_params.get('district', None)
+        use_ym_param = self.request.query_params.get('use_ym', None)
+
+        filters = {}
+
+        if district_param:
+            filters['district'] = district_param
+
+        if use_ym_param:
+            filters['use_ym'] = use_ym_param
+
+        return StationUsage.objects.filter(**filters)
 
 @api_view(['GET'])
 def setup_stationusage(request, seq_no):
@@ -91,11 +114,13 @@ def setup_stationusage(request, seq_no):
 
         header = next(csv_reader)
         data = [dict(zip(header, row)) for row in csv_reader]
-
+        
         for row_data in data:
             serializer = StationUsageSerializer(data=row_data)
             if serializer.is_valid():
                 serializer.save()
+            else:
+                print(row_data)
 
         return Response(len(data), status=status.HTTP_200_OK)
     else:

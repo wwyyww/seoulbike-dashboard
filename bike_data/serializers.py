@@ -67,6 +67,12 @@ class StationUsageSerializer(serializers.ModelSerializer):
     대여건수 = serializers.IntegerField(source='rental_count')
     반납건수 = serializers.IntegerField(source='return_count')
 
+    def to_internal_value(self, data):
+        for field in ['대여건수', '반납건수']:
+            if field in data and isinstance(data[field], str):
+                value=data[field].replace(',', '')
+                data[field] = int(value) if value!=' - ' else 0
+        return super().to_internal_value(data)
     class Meta:
         model = StationUsage
         fields = ['자치구', '대여소명', '기준년월', '대여건수', '반납건수']
