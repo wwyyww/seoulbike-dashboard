@@ -13,10 +13,15 @@ class StationAPISerializer(serializers.ModelSerializer):
     STA_ADD1 = serializers.CharField(source='addr1')
     STA_ADD2 = serializers.CharField(source='addr2', allow_blank=True)
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['STA_LAT'] = round(ret['STA_LAT'], 6)  # 첫 번째 필드를 6자리로 반올림
+        ret['STA_LONG'] = round(ret['STA_LONG'], 6)  # 두 번째 필드를 6자리로 반올림
+        return ret
+    
     class Meta:
         model = Station
         fields = ['RENT_NO', 'STA_LOC', 'RENT_NM','STA_LAT', 'STA_LONG', 'STA_ADD1', 'STA_ADD2']
-
 
 class UsageAPISerializer(serializers.Serializer):
     RENT_NM = serializers.CharField(source='use_date')
@@ -52,6 +57,9 @@ class UsageSerializer(serializers.ModelSerializer):
 class StationSerializer(serializers.ModelSerializer):
     # usages = UsageSerializer(many=True)
     usages_count = serializers.SerializerMethodField()
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
 
     class Meta:
         model = Station

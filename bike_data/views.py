@@ -9,8 +9,13 @@ from bike_data.serializers import *
 from io import StringIO
 import chardet
 import csv
+from .charts import plot_to_base64
 
 API_KEY = settings.API_KEY
+
+def show_image(request):
+    image_base64 = plot_to_base64()
+    return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
 
 
 class StationList(generics.ListAPIView):
@@ -21,9 +26,7 @@ class StationList(generics.ListAPIView):
         if param:
             return Station.objects.filter(location=param)
         else:
-            return Station.objects.all()
-        
-        return Station.objects.filter(location=param)
+            return Station.objects.all()        
 
 
 @api_view(['GET'])
@@ -38,7 +41,7 @@ def setup(request):
         url = f"http://openapi.seoul.go.kr:8088/{API_KEY}/json/tbCycleStationInfo/{i}/{i+499}/"
         response = requests.get(url)
         data = response.json()['stationInfo']['row']
-        serializer = StationSerializer(data=data, many=True)
+        serializer = StationAPISerializer(data=data, many=True)
         if serializer.is_valid():
             serializer.save()
         else:
