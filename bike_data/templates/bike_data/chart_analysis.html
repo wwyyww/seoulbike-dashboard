@@ -63,26 +63,18 @@
         $('#version').val('1');
         $('#district_param_div').hide();
         $('#use_ym_div').show();
-        {% comment %} $('#district_label, #district_param').hide();
-        $('#use_ym_label, #use_ym_param').show(); {% endcomment %}
 
         $('#version').change(function() {
             var selectedVersion = $(this).val();
             if (selectedVersion === '1') {
                 $('#district_param_div').hide();
                 $('#use_ym_div').show();
-                {% comment %} $('#district_label, #district_param').hide();
-                $('#use_ym_label, #use_ym_param').show(); {% endcomment %}
             } else if (selectedVersion === '5') {
                 $('#district_param_div').hide();
                 $('#use_ym_div').hide();
-                {% comment %} $('#district_label, #district_param').hide();
-                $('#use_ym_label, #use_ym_param').hide(); {% endcomment %}
             } else {
                 $('#district_param_div').show();
                 $('#use_ym_div').hide();
-                {% comment %} $('#district_label, #district_param').show();
-                $('#use_ym_label, #use_ym_param').hide(); {% endcomment %}
             }
             $('#district_param, #use_ym_param').val('');
         });
@@ -95,24 +87,29 @@
 
         var csrfToken = '{{ csrf_token }}';
         var url = (version == 5) ? '{% url "stations_by_district" %}' : '{% url "stationusage_analysis" %}';
-
-        $.ajax({
-            type: 'POST',
-            url: url,
-            data: {
-                csrfmiddlewaretoken: csrfToken,
-                district_param: districtParam,
-                use_ym_param: useYmParam,
-                version: version
-            },
-            success: function(data) {
-                $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
-                $('#district_param, #use_ym_param').val('');
-            },
-            error: function(error) {
-                console.log('Error:', error);
-            }
-        });
+        if (districtParam === "" && version>1 && version<5) {
+            alert("자치구를 선택해주세요.");
+        } else if (useYmParam == "" && version==1) {
+            alert("기준날짜를 입력해주세요.");
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    csrfmiddlewaretoken: csrfToken,
+                    district_param: districtParam,
+                    use_ym_param: useYmParam,
+                    version: version
+                },
+                success: function(data) {
+                    $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
+                    $('#district_param, #use_ym_param').val('');
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
     }
 </script>
 
