@@ -25,4 +25,4 @@ for(var i=0; i<station.length; i++){
     });
     markers.push(marker);
 }
-clusterer.addMarkers(merkers);
+clusterer.addMarkers(markers);
