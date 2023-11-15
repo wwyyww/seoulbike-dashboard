@@ -60,14 +60,7 @@ def setup_usage(request):
     return Response(len(serializer.validated_data), status=status.HTTP_200_OK)
 
 def mapping(request):
-    #stationlist = Station.objects.all()
-    #station_content = json.dumps(stationlist)
-    #usagelist = Usage.objects.all()
-    #usage_content = json.dumps(usagelist)
-    station_content = Station.objects.all()
-    usage_content = Usage.objects.all()
-    content = {'station_content' : station_content, 'usage_content' : usage_content}
-    return render(request, 'bike_data/index.html', content)
+    return render(request, 'bike_data/index.html')
 
 def text(request):
     #stationlist = Station.objects.all()
