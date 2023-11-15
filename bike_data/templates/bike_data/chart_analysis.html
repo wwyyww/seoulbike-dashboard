@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Usage Analysis</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+
+<form id="analysisForm">
+    <label for="version">종류 : </label>
+    <select id="version" name="version">
+        <option value="1">바-자치구 기준 대여건수 및 반납건수 총합</option>
+        <option value="2">바-월 기준 대여건수 및 반납건수 총합</option>
+        <option value="3">그래프-월 기준 대여건수</option>
+        <option value="4">그래프-월 기준 반납건수</option>
+    </select>
+    <br>
+    <label for="district_param" id="district_label">자치구 :</label>
+    <input type="text" id="district_param" name="district_param" placeholder="ex. 강남구">
+    <br>
+    <label for="use_ym_param" id="use_ym_label">기준년월 :</label>
+    <input type="text" id="use_ym_param" name="use_ym_param" placeholder="ex. 202301">
+    <br>
+    <button type="button" onclick="executeAnalysis()">이미지 보여줘!</button>
+</form>
+
+<div id="resultImage"></div>
+
+<script>
+    $(document).ready(function(){
+        $('#version').val('1');
+
+        $('#district_label, #district_param').hide();
+        $('#use_ym_label, #use_ym_param').show();
+
+        $('#version').change(function() {
+            var selectedVersion = $(this).val();
+            if (selectedVersion === '1') {
+                $('#district_label, #district_param').hide();
+                $('#use_ym_label, #use_ym_param').show();
+            } else {
+                $('#district_label, #district_param').show();
+                $('#use_ym_label, #use_ym_param').hide();
+            }
+            $('#district_param, #use_ym_param').val('');
+        });
+    });
+
+    function executeAnalysis() {
+        var districtParam = document.getElementById('district_param').value;
+        var useYmParam = document.getElementById('use_ym_param').value;
+        var version = document.getElementById('version').value;
+
+        var csrfToken = '{{ csrf_token }}';
+
+        $.ajax({
+            type: 'POST',
+            url: '{% url "stationusage_analysis" %}',
+            data: {
+                csrfmiddlewaretoken: csrfToken,
+                district_param: districtParam,
+                use_ym_param: useYmParam,
+                version: version
+            },
+            success: function(data) {
+                $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
+                $('#district_param, #use_ym_param').val('');
+            },
+            error: function(error) {
+                console.log('Error:', error);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

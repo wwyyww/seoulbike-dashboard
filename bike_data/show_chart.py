@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import requests
 from .models import Station
 
+from django.shortcuts import render
+
 def fetch_data(api_url, params=None):
     all_data = []
 
@@ -27,7 +29,7 @@ def fetch_data(api_url, params=None):
         except requests.exceptions.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
     else:
-        print(f"Failed to fetch data from the API. Status code: {response.status_code}")
+        print(f"Status code: {response.status_code}")
         return None
 
 def barplot_usage_per_month(df, title):
@@ -41,8 +43,8 @@ def barplot_usage_per_month(df, title):
 
     df3 = pd.merge(df1, df2, on='기준년월')
 
-    plt.rc("font", family="Malgun Gothic") # 한글표시 (window)
-    plt.rc("axes", unicode_minus=False) # x,y축 (-)부호 표시
+    plt.rc("font", family="Malgun Gothic")
+    plt.rc("axes", unicode_minus=False)
 
     print(df3)
     plt.figure(figsize=(10, 6))
@@ -53,17 +55,22 @@ def barplot_usage_per_month(df, title):
     plt.ylabel('건수')
     plt.title(title)
     plt.legend()
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
 
-    plt.show()
+    image_png = buffer.getvalue()
+    buffer.close()
+    return base64.b64encode(image_png).decode()
 
 def barplot_usage_total_district(df, title):
     df = df.pivot_table(index='자치구', values=['대여건수', '반납건수'], aggfunc='sum').reset_index()
 
-    bar_width = 0.35  # 막대의 폭을 조절
+    bar_width = 0.35
     indices = np.arange(len(df['자치구']))
 
-    plt.rc("font", family="Malgun Gothic") # 한글표시 (window)
-    plt.rc("axes", unicode_minus=False) # x,y축 (-)부호 표시
+    plt.rc("font", family="Malgun Gothic")
+    plt.rc("axes", unicode_minus=False)
 
     plt.figure(figsize=(12, 8))
     plt.bar(indices, df['대여건수'], width=bar_width, label='대여건수', alpha=0.7)
@@ -75,13 +82,19 @@ def barplot_usage_total_district(df, title):
     plt.xticks(indices + bar_width / 0.5, df['자치구'], rotation=45, ha='right')
 
     plt.tight_layout()
-    plt.show()
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+
+    image_png = buffer.getvalue()
+    buffer.close()
+    return base64.b64encode(image_png).decode()
 
 def graphplot_usage_per_district(df, standard, title):
     monthly_sum = df.groupby('기준년월')[standard].sum()
 
-    plt.rc("font", family="Malgun Gothic") # 한글표시 (window)
-    plt.rc("axes", unicode_minus=False) # x,y축 (-)부호 표시
+    plt.rc("font", family="Malgun Gothic")
+    plt.rc("axes", unicode_minus=False)
 
     plt.figure(figsize=(10, 6))
     plt.plot(monthly_sum.index, monthly_sum.values, marker='o', linestyle='-', color='b')
@@ -98,29 +111,32 @@ def graphplot_usage_per_district(df, standard, title):
     buffer.close()
     return base64.b64encode(image_png).decode()
 
-def applyAnalysis(district_param, use_ym_param):
+def applyAnalysis(district_param, use_ym_param, version):
     api_url = "http://127.0.0.1:8000/api/stationusage/"
-
-    district_param = None if district_param.lower() == "none" else district_param
-    use_ym_param = None if use_ym_param.lower() == "none" else use_ym_param
 
     params = {'district': district_param, 'use_ym': use_ym_param}
 
     df = fetch_data(api_url)
     
-    if df is not None:
-        barplot_usage_total_district(df, '각 자치구별 대여건수와 반납건수')
-        barplot_usage_per_month(df, '대여건수와 반납건수 추이')
+    if df is not None and not district_param and not use_ym_param:
+        if version == 1:
+            return barplot_usage_total_district(df, '각 자치구별 대여건수와 반납건수')
+        elif version == 2:
+            return barplot_usage_per_month(df, '대여건수와 반납건수 추이')
     
     if(district_param or use_ym_param):
-        df2=fetch_data(api_url,params)
+        df2 = fetch_data(api_url, params)
         if(df2 is not None):
             if(district_param and not use_ym_param):
-                barplot_usage_per_month(df2, f'{district_param} 월별 대여건수 및 반납 건수')
-                graphplot_usage_per_district(df2, '대여건수', f'{district_param} 월별 대여건수')
-                graphplot_usage_per_district(df2, '반납건수', f'{district_param} 월별 반납건수')
+                if version == 2:
+                    return barplot_usage_per_month(df2, f'{district_param} 월별 대여건수 및 반납 건수')
+                elif version == 3:
+                    return graphplot_usage_per_district(df2, '대여건수', f'{district_param} 월별 대여건수')
+                elif version == 4:
+                    return graphplot_usage_per_district(df2, '반납건수', f'{district_param} 월별 반납건수')
             if(use_ym_param and not district_param):
-                barplot_usage_total_district(df2, f'각 자치구별 {use_ym_param[-2:]}월 대여건수 및 반납 건수')
+                if version == 1:
+                    return barplot_usage_total_district(df2, f'각 자치구별 {use_ym_param[-2:]}월 대여건수 및 반납 건수')
 
 def barplot_station_per_district():
     plt.rc("font", family="Malgun Gothic") # 한글표시 (window)
