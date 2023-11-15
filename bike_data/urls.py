@@ -9,7 +9,6 @@ urlpatterns = [
     path('usage/', UsageList.as_view()),
     path('setup_stationusage/<int:seq_no>/', setup_stationusage),
     path('stationusage/', StationUsageList.as_view()),
-    path('chart/station_district', station_by_district, name="stations_by_district"),
-    path('chart/usage_district', usage_by_district, name="usage_by_district"),
-
+    path('chart/station_district/', station_by_district, name="stations_by_district"),
+    path('chart/stationusage_analysis/', stationusage_analysis, name='stationusage_analysis'),
 ]

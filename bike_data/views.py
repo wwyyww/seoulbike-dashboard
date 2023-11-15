@@ -10,6 +10,7 @@ from io import StringIO
 import chardet
 import csv
 from .show_chart import *
+from django.http import JsonResponse 
 
 API_KEY = settings.API_KEY
 
@@ -17,10 +18,16 @@ def station_by_district(request):
     image_base64 = barplot_station_per_district()
     return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
 
-def usage_by_district(request):
-    image_base64 = graphplot_usage_per_district()
-    return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
+def stationusage_analysis(request):
+    if request.method == 'POST':
+        district_param = request.POST.get('district_param', '')
+        use_ym_param = request.POST.get('use_ym_param', '')
+        version = int(request.POST.get('version', '1'))
 
+        image_base64 = applyAnalysis(district_param, use_ym_param, version)
+        return JsonResponse({'image_base64': image_base64})
+
+    return render(request, 'bike_data/chart_analysis.html')
 
 class StationList(generics.ListAPIView):
     serializer_class = StationSerializer
@@ -73,7 +80,7 @@ def setup_usage(request):
         return Response(serializer.errors)
 
 class LargeResultsSetPagination(PageNumberPagination):
-    page_size = 1000
+    page_size = 10000
     page_size_query_param = 'page_size'
     max_page_size = 10000
 
