@@ -6,8 +6,8 @@ class Station(models.Model):
     location = models.CharField(max_length=200, verbose_name='자치구') 
     addr1 = models.CharField(max_length=200, verbose_name='주소1')
     addr2 = models.CharField(max_length=200, verbose_name='주소2', null=True)
-    latitude = models.DecimalField(max_digits=11, decimal_places=8, verbose_name='위도')
-    longitude = models.DecimalField(max_digits=11, decimal_places=8, verbose_name='경도')
+    latitude = models.DecimalField(max_digits=11, decimal_places=6, verbose_name='위도')
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, verbose_name='경도')
 
 class Usage(models.Model):
     station = models.ForeignKey(Station, related_name='usages', on_delete=models.CASCADE, db_column="station_id")
@@ -15,3 +15,10 @@ class Usage(models.Model):
     use_date = models.CharField(max_length=8,verbose_name='대여날짜')
     gender = models.CharField(max_length=10, verbose_name='성별',null=True)
     age_range = models.CharField(max_length=10, verbose_name='연령대', null=True) 
+
+class StationUsage(models.Model):
+    district = models.CharField(max_length=255)
+    station_name = models.CharField(max_length=255)
+    use_ym = models.CharField(max_length=6)
+    rental_count = models.IntegerField()
+    return_count = models.IntegerField()

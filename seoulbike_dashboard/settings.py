@@ -27,11 +27,6 @@ API_KEY = env('API_KEY')
 
 pymysql.install_as_MySQLdb()
 
-# Pagination Setting
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10, 
-}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
