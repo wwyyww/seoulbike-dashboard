@@ -139,3 +139,16 @@ def setup_stationusage(request, seq_no):
         return Response(len(data), status=status.HTTP_200_OK)
     else:
         return render(request, 'error.html', {'error_message': 'Failed'})
+
+def mapping(request):
+    return render(request, 'bike_data/index.html')
+
+def seoulbike(request):
+    #stationlist = Station.objects.all()
+    #station_content = json.dumps(stationlist)
+    #usagelist = Usage.objects.all()
+    #usage_content = json.dumps(usagelist)
+    station_content = Station.objects.all()
+    usage_content = Usage.objects.all()
+    content = {'station_content' : station_content, 'usage_content' : usage_content}
+    return render(request, 'bike_data/seoulbike.html', content)
