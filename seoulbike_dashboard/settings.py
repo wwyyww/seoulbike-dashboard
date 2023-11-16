@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'map_visualize.apps.MapVisualizeConfig',
 ]
 
 MIDDLEWARE = [

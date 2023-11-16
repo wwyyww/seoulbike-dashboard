@@ -16,7 +16,7 @@ API_KEY = settings.API_KEY
 
 def station_by_district(request):
     image_base64 = barplot_station_per_district()
-    return render(request, 'bike_data/data_visualization.html', {'image_base64': image_base64})
+    return JsonResponse({'image_base64': image_base64})
 
 def stationusage_analysis(request):
     if request.method == 'POST':
