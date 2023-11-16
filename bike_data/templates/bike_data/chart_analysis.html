@@ -9,21 +9,51 @@
 <body>
 
 <form id="analysisForm">
-    <label for="version">종류 : </label>
-    <select id="version" name="version">
-        <option value="1">바-자치구 기준 대여건수 및 반납건수 총합</option>
-        <option value="2">바-월 기준 대여건수 및 반납건수 총합</option>
-        <option value="3">그래프-월 기준 대여건수</option>
-        <option value="4">그래프-월 기준 반납건수</option>
-    </select>
-    <br>
-    <label for="district_param" id="district_label">자치구 :</label>
-    <input type="text" id="district_param" name="district_param" placeholder="ex. 강남구">
-    <br>
-    <label for="use_ym_param" id="use_ym_label">기준년월 :</label>
-    <input type="text" id="use_ym_param" name="use_ym_param" placeholder="ex. 202301">
-    <br>
     <button type="button" onclick="executeAnalysis()">이미지 보여줘!</button>
+    <div>
+        <label for="version">종류 : </label>
+        <select id="version" name="version">
+            <option value="1">바-자치구 기준 대여건수 및 반납건수 총합</option>
+            <option value="2">바-월 기준 대여건수 및 반납건수 총합</option>
+            <option value="3">그래프-월 기준 대여건수</option>
+            <option value="4">그래프-월 기준 반납건수</option>
+            <option value="5">자치구별 공공자전거 대여소 수</option>
+        </select>
+    </div>
+    <div id="district_param_div" name="district_param_div">
+        <label for="district_param" id="district_label">자치구 :</label>
+        <select name="district_param" id="district_param">
+            <option value="강남구">강남구</option>
+            <option value="강동구">강동구</option>
+            <option value="강북구">강북구</option>
+            <option value="강서구">강서구</option>
+            <option value="관악구">관악구</option>
+            <option value="광진구">광진구</option>
+            <option value="구로구">구로구</option>
+            <option value="금천구">금천구</option>
+            <option value="노원구">노원구</option>
+            <option value="도봉구">도봉구</option>
+            <option value="동대문구">동대문구</option>
+            <option value="동작구">동작구</option>
+            <option value="마포구">마포구</option>
+            <option value="서대문구">서대문구</option>
+            <option value="서초구">서초구</option>
+            <option value="성동구">성동구</option>
+            <option value="성북구">성북구</option>
+            <option value="송파구">송파구</option>
+            <option value="양천구">양천구</option>
+            <option value="영등포구">영등포구</option>
+            <option value="용산구">용산구</option>
+            <option value="은평구">은평구</option>
+            <option value="종로구">종로구</option>
+            <option value="중구">중구</option>
+            <option value="중랑구">중랑구</option>
+        </select>
+    </div>
+    <div id="use_ym_div" name="use_ym_div">
+        <label for="use_ym_param" id="use_ym_label">기준년월 :</label>
+        <input type="text" id="use_ym_param" name="use_ym_param" placeholder="ex. 202301">
+    </div>
 </form>
 
 <div id="resultImage"></div>
@@ -31,18 +61,20 @@
 <script>
     $(document).ready(function(){
         $('#version').val('1');
-
-        $('#district_label, #district_param').hide();
-        $('#use_ym_label, #use_ym_param').show();
+        $('#district_param_div').hide();
+        $('#use_ym_div').show();
 
         $('#version').change(function() {
             var selectedVersion = $(this).val();
             if (selectedVersion === '1') {
-                $('#district_label, #district_param').hide();
-                $('#use_ym_label, #use_ym_param').show();
+                $('#district_param_div').hide();
+                $('#use_ym_div').show();
+            } else if (selectedVersion === '5') {
+                $('#district_param_div').hide();
+                $('#use_ym_div').hide();
             } else {
-                $('#district_label, #district_param').show();
-                $('#use_ym_label, #use_ym_param').hide();
+                $('#district_param_div').show();
+                $('#use_ym_div').hide();
             }
             $('#district_param, #use_ym_param').val('');
         });
@@ -54,24 +86,30 @@
         var version = document.getElementById('version').value;
 
         var csrfToken = '{{ csrf_token }}';
-
-        $.ajax({
-            type: 'POST',
-            url: '{% url "stationusage_analysis" %}',
-            data: {
-                csrfmiddlewaretoken: csrfToken,
-                district_param: districtParam,
-                use_ym_param: useYmParam,
-                version: version
-            },
-            success: function(data) {
-                $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
-                $('#district_param, #use_ym_param').val('');
-            },
-            error: function(error) {
-                console.log('Error:', error);
-            }
-        });
+        var url = (version == 5) ? '{% url "stations_by_district" %}' : '{% url "stationusage_analysis" %}';
+        if (districtParam === "" && version>1 && version<5) {
+            alert("자치구를 선택해주세요.");
+        } else if (useYmParam == "" && version==1) {
+            alert("기준날짜를 입력해주세요.");
+        } else {
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    csrfmiddlewaretoken: csrfToken,
+                    district_param: districtParam,
+                    use_ym_param: useYmParam,
+                    version: version
+                },
+                success: function(data) {
+                    $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
+                    $('#district_param, #use_ym_param').val('');
+                },
+                error: function(error) {
+                    console.log('Error:', error);
+                }
+            });
+        }
     }
 </script>
 
