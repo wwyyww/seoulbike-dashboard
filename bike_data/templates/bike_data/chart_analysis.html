@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Kakao map api를 이용한 seoulbike-dashboard 시각화</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="/static/assets/favicon.ico" />
+        <!-- Bootstrap icons-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <link href="/static/css/styles.css" rel="stylesheet" />
+        <link href="/static/css/style.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="#!">Seoulbike-dashboard</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item"><a class="nav-link" aria-current="page" href="/api/seoulbike">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/api/chart/stationusage_analysis">Chart</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Product section-->
+        <section class="py-5">
+            <div class="container px-4 px-lg-5 my-5">
+                <form id="analysisForm">
+                    <label for="version">종류 : </label>
+                    <select id="version" name="version">
+                        <option value="1">바-자치구 기준 대여건수 및 반납건수 총합</option>
+                        <option value="2">바-월 기준 대여건수 및 반납건수 총합</option>
+                        <option value="3">그래프-월 기준 대여건수</option>
+                        <option value="4">그래프-월 기준 반납건수</option>
+                    </select>
+                    <br>
+                    <label for="district_param" id="district_label">자치구 :</label>
+                    <input type="text" id="district_param" name="district_param" placeholder="ex. 강남구">
+                    <br>
+                    <label for="use_ym_param" id="use_ym_label">기준년월 :</label>
+                    <input type="text" id="use_ym_param" name="use_ym_param" placeholder="ex. 202301">
+                    <br>
+                    <button class="btn btn-outline-dark flex-shrink-0" type="button" onclick="executeAnalysis()">시각화</button>
+                </form>
+                <div class="row gx-4 gx-lg-5 align-items-center">
+                    <div class="col-md-6">
+                        <div id="resultImage"></div>
+                    </div>
+                    <script>
+                        $(document).ready(function(){
+                            $('#version').val('1');
+                    
+                            $('#district_label, #district_param').hide();
+                            $('#use_ym_label, #use_ym_param').show();
+                    
+                            $('#version').change(function() {
+                                var selectedVersion = $(this).val();
+                                if (selectedVersion === '1') {
+                                    $('#district_label, #district_param').hide();
+                                    $('#use_ym_label, #use_ym_param').show();
+                                } else {
+                                    $('#district_label, #district_param').show();
+                                    $('#use_ym_label, #use_ym_param').hide();
+                                }
+                                $('#district_param, #use_ym_param').val('');
+                            });
+                        });
+                    
+                        function executeAnalysis() {
+                            var districtParam = document.getElementById('district_param').value;
+                            var useYmParam = document.getElementById('use_ym_param').value;
+                            var version = document.getElementById('version').value;
+                    
+                            var csrfToken = '{{ csrf_token }}';
+                    
+                            $.ajax({
+                                type: 'POST',
+                                url: '{% url "stationusage_analysis" %}',
+                                data: {
+                                    csrfmiddlewaretoken: csrfToken,
+                                    district_param: districtParam,
+                                    use_ym_param: useYmParam,
+                                    version: version
+                                },
+                                success: function(data) {
+                                    $('#resultImage').html('<img src="data:image/png;base64,' + data.image_base64 + '" />');
+                                    $('#district_param, #use_ym_param').val('');
+                                },
+                                error: function(error) {
+                                    console.log('Error:', error);
+                                }
+                            });
+                        }
+                    </script>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=cd3190ada0d066115f2a46edfec271ab&libraries=services,clusterer,drawing" type="text/javascript" ></script>
+        <script src="/static/js/map.js" type="text/javascript"></script>
+        <script src="/static/js/marker.js" type="text/javascript"></script>
+    </body>
+</html>

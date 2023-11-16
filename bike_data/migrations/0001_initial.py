@@ -20,8 +20,8 @@ class Migration(migrations.Migration):
                 ('location', models.CharField(max_length=200, verbose_name='자치구')),
                 ('addr1', models.CharField(max_length=200, verbose_name='주소1')),
                 ('addr2', models.CharField(max_length=200, null=True, verbose_name='주소2')),
-                ('latitude', models.DecimalField(decimal_places=8, max_digits=11, verbose_name='위도')),
-                ('longitude', models.DecimalField(decimal_places=8, max_digits=11, verbose_name='경도')),
+                ('latitude', models.DecimalField(decimal_places=6, max_digits=11, verbose_name='위도')),
+                ('longitude', models.DecimalField(decimal_places=6, max_digits=11, verbose_name='경도')),
             ],
         ),
         migrations.CreateModel(
