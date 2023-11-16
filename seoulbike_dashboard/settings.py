@@ -23,7 +23,6 @@ environ.Env.read_env(
     env_file=os.path.join(BASE_DIR, '.env')
 )
 API_KEY = env('API_KEY')
-MAP_API_KEY = env('MAP_API_KEY')
 
 
 pymysql.install_as_MySQLdb()
